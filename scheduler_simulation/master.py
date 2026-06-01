@@ -7,7 +7,9 @@ from .models import Pod, SchedulingDecision, SchedulingResult, Worker
 
 
 class Scheduler(Protocol):
-    name: str
+    @property
+    def name(self) -> str:
+        ...
 
     def select_worker(self, pod: Pod, workers: List[Worker]) -> SchedulingDecision:
         ...
