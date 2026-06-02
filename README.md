@@ -5,21 +5,6 @@ inspirado no Kubernetes. A solucao nao usa Kubernetes real: ela cria estruturas
 de Master, Workers e PODs, executa um algoritmo de escalonamento proprio e
 mostra a alocacao final no terminal.
 
-## Requisitos atendidos
-
-- 1 nodo Master responsavel por acionar o escalonador.
-- No minimo 2 nodos Workers, configuraveis por parametro.
-- Mais de 10 PODs, configuraveis por parametro.
-- Workers com capacidades de CPU, memoria, disco e latencia media de rede.
-- PODs com requisitos diferentes de CPU, memoria, disco e latencia maxima.
-- Algoritmo de escalonamento com quatro metricas: CPU, memoria, disco e
-  latencia.
-- Implantacao simulada dos PODs nos Workers.
-- Visualizacao dos recursos usados, livres e totais de cada Worker.
-- Estatisticas do processamento.
-- Comparacao tecnica com um escalonador Kubernetes-like que considera apenas
-  CPU e memoria.
-
 ## Como executar
 
 Nao ha dependencias externas. Basta usar Python 3.
