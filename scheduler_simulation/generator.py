@@ -36,7 +36,7 @@ def generate_workers(count: int, seed: int) -> List[Worker]:
             )
         )
 
-    # Cria uma matriz simetrica de latencia entre Workers.
+    # Cria uma matriz simetrica de latencia entre Workers
     for source_index, source in enumerate(workers):
         for target_index, target in enumerate(workers):
             if source.name == target.name:
@@ -44,7 +44,7 @@ def generate_workers(count: int, seed: int) -> List[Worker]:
             elif target.name not in source.network_latencies_ms:
                 distance = abs(source_index - target_index)
                 latency = rng.randint(8, 35) + distance * rng.randint(12, 35)
-                if rng.random() < 0.25:
+                if rng.random() < 0.25: #cria uma chance de 25% de adicionar uma latência extra
                     latency += rng.randint(20, 60)
                 source.network_latencies_ms[target.name] = latency
                 target.network_latencies_ms[source.name] = latency
