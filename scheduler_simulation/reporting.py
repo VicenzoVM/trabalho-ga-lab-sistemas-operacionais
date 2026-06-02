@@ -179,12 +179,7 @@ def print_comparison(
     ]
     print_table(["Criterio", "Solucao proposta", "Kubernetes-like"], rows)
     print()
-    print(
-        "Analise: a solucao proposta pode rejeitar PODs que ainda caberiam em CPU e "
-        "memoria, porque tambem protege disco e latencia. O escalonador "
-        "Kubernetes-like tende a alocar mais agressivamente, mas pode produzir "
-        "violacoes nas metricas adicionais usadas nesta simulacao."
-    )
+    
 
 
 def print_title(title: str) -> None:
