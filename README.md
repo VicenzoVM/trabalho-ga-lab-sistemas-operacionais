@@ -1,116 +1,116 @@
-# Simulacao de escalonamento de PODs
+# Simulação de escalonamento de PODs
 
-Este projeto implementa, em Python puro, uma simulacao de um orquestrador
-inspirado no Kubernetes. A solucao nao usa Kubernetes real: ela cria estruturas
-de Master, Workers e PODs, executa um algoritmo de escalonamento proprio e
-mostra a alocacao final no terminal.
+Este projeto implementa, em Python puro, uma simulação de um orquestrador
+inspirado no Kubernetes. A solução não usa Kubernetes real: ela cria estruturas
+de Master, Workers e PODs, executa um algoritmo de escalonamento próprio e
+mostra a alocação final no terminal.
 
 ## Como executar
 
-Nao ha dependencias externas. Basta usar Python 3.
+Não há dependências externas. Basta usar Python 3.
 
 ```bash
 python3 main.py
 ```
 
-Exemplo com parametros:
+Exemplo com parâmetros:
 
 ```bash
 python3 main.py --workers 4 --pods 30 --seed 7
 ```
 
-Parametros disponiveis:
+Parâmetros disponíveis:
 
-| Parametro | Padrao | Descricao |
+| Parâmetro | Padrão | Descrição |
 | --- | ---: | --- |
-| `--workers` | `3` | Quantidade de nodos Workers. Minimo: 2. |
-| `--pods` | `20` | Quantidade de PODs gerados. Minimo: 11. |
-| `--seed` | `42` | Semente usada para repetir a mesma simulacao. |
+| `--workers` | `3` | Quantidade de nodos Workers. Mínimo: 2. |
+| `--pods` | `20` | Quantidade de PODs gerados. Mínimo: 11. |
+| `--seed` | `42` | Semente usada para repetir a mesma simulação. |
 
-## Estrutura do codigo
+## Estrutura do código
 
 | Arquivo | Responsabilidade |
 | --- | --- |
-| `main.py` | Ponto de entrada da aplicacao CLI. |
-| `scheduler_simulation/cli.py` | Leitura de parametros e montagem da simulacao. |
+| `main.py` | Ponto de entrada da aplicação CLI. |
+| `scheduler_simulation/cli.py` | Leitura de parâmetros e montagem da simulação. |
 | `scheduler_simulation/models.py` | Estruturas de POD, Worker e resultado. |
 | `scheduler_simulation/master.py` | Estrutura do nodo Master. |
 | `scheduler_simulation/scheduler.py` | Escalonador proposto e escalonador Kubernetes-like. |
-| `scheduler_simulation/generator.py` | Geracao reprodutivel de Workers e PODs. |
-| `scheduler_simulation/stats.py` | Calculo de estatisticas. |
-| `scheduler_simulation/reporting.py` | Saida tabular no terminal. |
+| `scheduler_simulation/generator.py` | Geração reprodutível de Workers e PODs. |
+| `scheduler_simulation/stats.py` | Cálculo de estatísticas. |
+| `scheduler_simulation/reporting.py` | Saída tabular no terminal. |
 
-## Modelo da simulacao
+## Modelo da simulação
 
 O Master possui uma lista de Workers e um escalonador. Para cada POD criado, o
-Master chama o escalonador, recebe a decisao e registra o POD no Worker escolhido.
+Master chama o escalonador, recebe a decisão e registra o POD no Worker escolhido.
 
 Cada Worker possui:
 
 - CPU total.
-- Memoria total.
+- Memória total.
 - Disco total.
-- Matriz de latencias para os outros Workers.
+- Matriz de latências para os outros Workers.
 - Lista de PODs alocados.
 
 Cada POD possui:
 
 - Requisito de CPU.
-- Requisito de memoria.
+- Requisito de memória.
 - Requisito de disco.
-- Latencia maxima aceitavel.
+- Latência máxima aceitável.
 - Tipo de carga, como `api`, `cache`, `database`, `batch` ou `analytics`.
 
 ## Algoritmo de escalonamento proposto
 
 O escalonador `ResourceAwareScheduler` filtra primeiro os Workers que conseguem
-receber o POD considerando todas as metricas:
+receber o POD considerando todas as métricas:
 
-1. CPU disponivel maior ou igual a CPU solicitada.
-2. Memoria disponivel maior ou igual a memoria solicitada.
-3. Disco disponivel maior ou igual ao disco solicitado.
-4. Latencia media do Worker menor ou igual a latencia maxima do POD.
+1. CPU disponível maior ou igual à CPU solicitada.
+2. Memória disponível maior ou igual à memória solicitada.
+3. Disco disponível maior ou igual ao disco solicitado.
+4. Latência média do Worker menor ou igual à latência máxima do POD.
 
-Depois disso, calcula uma pontuacao para cada Worker candidato:
+Depois disso, calcula uma pontuação para cada Worker candidato:
 
 ```text
-score = CPU_livre_apos_alocacao * 0.30
-      + memoria_livre_apos_alocacao * 0.25
-      + disco_livre_apos_alocacao * 0.25
-      + aderencia_de_latencia * 0.20
-      - penalidade_de_desequilibrio * 0.10
+score = CPU_livre_após_alocação * 0.30
+      + memória_livre_após_alocação * 0.25
+      + disco_livre_após_alocação * 0.25
+      + aderência_de_latência * 0.20
+      - penalidade_de_desequilíbrio * 0.10
 ```
 
-A penalidade de desequilibrio usa o desvio padrao das utilizacoes de CPU,
-memoria e disco apos a possivel alocacao. Isso evita escolher um Worker que
-ficaria muito pressionado em apenas uma dimensao de recurso.
+A penalidade de desequilíbrio usa o desvio padrão das utilizações de CPU,
+memória e disco após a possível alocação. Isso evita escolher um Worker que
+ficaria muito pressionado em apenas uma dimensão de recurso.
 
-## Saidas apresentadas
+## Saídas apresentadas
 
-A execucao mostra:
+A execução mostra:
 
 - Capacidades iniciais dos Workers.
 - Lista de PODs criados.
-- Decisao tomada para cada POD.
+- Decisão tomada para cada POD.
 - Estado final dos Workers, incluindo PODs alocados.
 - Recursos usados, totais e livres por Worker.
-- PODs nao alocados e seus motivos.
-- Estatisticas gerais do escalonamento.
-- Comparacao com o escalonador Kubernetes-like.
+- PODs não alocados e seus motivos.
+- Estatísticas gerais do escalonamento.
+- Comparação com o escalonador Kubernetes-like.
 
-## Comparacao com Kubernetes-like
+## Comparação com Kubernetes-like
 
 O escalonador `KubernetesLikeScheduler` representa a regra simplificada descrita
-no enunciado: ele considera apenas CPU e memoria. Essa comparacao permite ver
-casos em que um POD seria alocado pelo criterio padrao, mas produziria problemas
-quando a simulacao tambem exige disco e latencia.
+no enunciado: ele considera apenas CPU e memória. Essa comparação permite ver
+casos em que um POD seria alocado pelo critério padrão, mas produziria problemas
+quando a simulação também exige disco e latência.
 
-Na solucao proposta, um POD pode ser rejeitado mesmo havendo CPU e memoria
-livres, caso nao exista disco suficiente ou caso a latencia media do Worker
-ultrapasse o limite do POD. Essa decisao e mais conservadora, mas evita
-alocacoes que violam metricas adicionais do ambiente.
+Na solução proposta, um POD pode ser rejeitado mesmo havendo CPU e memória
+livres, caso não exista disco suficiente ou caso a latência média do Worker
+ultrapasse o limite do POD. Essa decisão é mais conservadora, mas evita
+alocações que violam métricas adicionais do ambiente.
 
-## Observacao
+## Observação
 
-Todos os dados sao simulados. A opcao `--seed` permite repetir exatamente a
-mesma configuracao de Workers, PODs e latencias para comparacao e apresentacao.
+Todos os dados são simulados. A opção `--seed` permite repetir exatamente a
+mesma configuração de Workers, PODs e latências para comparação e apresentação.
